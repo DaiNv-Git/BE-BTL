@@ -11,6 +11,9 @@ public record SaveCvRequest(
         @NotBlank String education,
         @NotBlank String experience,
         String certifications,
+        String projects,
+        String languages,
+        String hobbies,
         String template
 ) {
 }

@@ -17,6 +17,9 @@ public record CvResponse(
         String education,
         String experience,
         String certifications,
+        String projects,
+        String languages,
+        String hobbies,
         String template,
         LocalDateTime updatedAt
 ) {
@@ -35,6 +38,9 @@ public record CvResponse(
                 cv.getEducation(),
                 cv.getExperience(),
                 cv.getCertifications(),
+                cv.getProjects(),
+                cv.getLanguages(),
+                cv.getHobbies(),
                 cv.getTemplate(),
                 cv.getUpdatedAt()
         );

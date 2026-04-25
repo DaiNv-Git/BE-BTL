@@ -50,6 +50,9 @@ public class CvController {
                         request.education(),
                         request.experience(),
                         request.certifications() == null ? "" : request.certifications(),
+                        request.projects() == null ? "" : request.projects(),
+                        request.languages() == null ? "" : request.languages(),
+                        request.hobbies() == null ? "" : request.hobbies(),
                         request.template()
                 ));
         cv.update(
@@ -61,6 +64,9 @@ public class CvController {
                 request.education(),
                 request.experience(),
                 request.certifications() == null ? "" : request.certifications(),
+                request.projects() == null ? "" : request.projects(),
+                request.languages() == null ? "" : request.languages(),
+                request.hobbies() == null ? "" : request.hobbies(),
                 request.template()
         );
         CandidateCv saved = cvs.save(cv);

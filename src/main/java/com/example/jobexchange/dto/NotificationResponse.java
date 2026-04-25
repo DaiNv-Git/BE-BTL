@@ -8,7 +8,8 @@ public record NotificationResponse(
         String title,
         String message,
         boolean read,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        Long jobId
 ) {
     public static NotificationResponse from(UserNotification notification) {
         return new NotificationResponse(
@@ -16,7 +17,8 @@ public record NotificationResponse(
                 notification.getTitle(),
                 notification.getMessage(),
                 notification.isReadFlag(),
-                notification.getCreatedAt()
+                notification.getCreatedAt(),
+                notification.getJobId()
         );
     }
 }

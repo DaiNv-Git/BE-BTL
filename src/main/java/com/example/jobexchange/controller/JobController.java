@@ -28,17 +28,20 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/jobs")
+@org.springframework.transaction.annotation.Transactional
 public class JobController {
     private final JobPostRepository jobs;
     private final AppUserRepository users;
     private final JobApplicationRepository applications;
     private final AuthContext authContext;
+    private final com.example.jobexchange.repository.UserNotificationRepository notifications;
 
-    public JobController(JobPostRepository jobs, AppUserRepository users, JobApplicationRepository applications, AuthContext authContext) {
+    public JobController(JobPostRepository jobs, AppUserRepository users, JobApplicationRepository applications, AuthContext authContext, com.example.jobexchange.repository.UserNotificationRepository notifications) {
         this.jobs = jobs;
         this.users = users;
         this.applications = applications;
         this.authContext = authContext;
+        this.notifications = notifications;
     }
 
     @GetMapping
@@ -69,9 +72,22 @@ public class JobController {
                 request.requirements(),
                 employer
         );
-        return JobResponse.from(jobs.save(job));
+        JobPost savedJob = jobs.save(job);
+        
+        users.findByRole(UserRole.ADMIN).forEach(admin -> {
+            com.example.jobexchange.domain.UserNotification notif = new com.example.jobexchange.domain.UserNotification(
+                    admin,
+                    "Co viec lam moi can duyet",
+                    "Nha tuyen dung " + employer.getFullName() + " vua dang cong viec: " + savedJob.getTitle(),
+                    savedJob.getId()
+            );
+            notifications.save(notif);
+        });
+        
+        return JobResponse.from(savedJob);
     }
 
+    @org.springframework.transaction.annotation.Transactional
     @RequestMapping(path = "/{id}/approve", method = {RequestMethod.PATCH, RequestMethod.POST})
     public JobResponse approve(@PathVariable Long id, @RequestHeader(value = "X-User-Id", required = false) Long userId) {
         authContext.requireRole(userId, UserRole.ADMIN);
@@ -81,6 +97,7 @@ public class JobController {
         return JobResponse.from(jobs.save(job));
     }
 
+    @org.springframework.transaction.annotation.Transactional
     @RequestMapping(path = "/{id}/close", method = {RequestMethod.PATCH, RequestMethod.POST})
     public JobResponse close(@PathVariable Long id, @RequestHeader(value = "X-User-Id", required = false) Long userId) {
         authContext.requireRole(userId, UserRole.ADMIN);

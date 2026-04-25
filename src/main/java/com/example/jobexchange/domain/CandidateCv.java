@@ -44,6 +44,15 @@ public class CandidateCv {
     @Column(nullable = false, length = 1000)
     private String certifications;
 
+    @Column(length = 2000)
+    private String projects;
+
+    @Column(length = 500)
+    private String languages;
+
+    @Column(length = 500)
+    private String hobbies;
+
     @Column(nullable = true)
     private String template = "classic";
 
@@ -53,12 +62,12 @@ public class CandidateCv {
     protected CandidateCv() {
     }
 
-    public CandidateCv(AppUser candidate, String title, String desiredPosition, String experienceLevel, String summary, String skills, String education, String experience, String certifications, String template) {
+    public CandidateCv(AppUser candidate, String title, String desiredPosition, String experienceLevel, String summary, String skills, String education, String experience, String certifications, String projects, String languages, String hobbies, String template) {
         this.candidate = candidate;
-        update(title, desiredPosition, experienceLevel, summary, skills, education, experience, certifications, template);
+        update(title, desiredPosition, experienceLevel, summary, skills, education, experience, certifications, projects, languages, hobbies, template);
     }
 
-    public void update(String title, String desiredPosition, String experienceLevel, String summary, String skills, String education, String experience, String certifications, String template) {
+    public void update(String title, String desiredPosition, String experienceLevel, String summary, String skills, String education, String experience, String certifications, String projects, String languages, String hobbies, String template) {
         this.title = title;
         this.desiredPosition = desiredPosition;
         this.experienceLevel = experienceLevel;
@@ -67,6 +76,9 @@ public class CandidateCv {
         this.education = education;
         this.experience = experience;
         this.certifications = certifications;
+        this.projects = projects;
+        this.languages = languages;
+        this.hobbies = hobbies;
         this.template = template == null || template.isBlank() ? "classic" : template;
         this.updatedAt = LocalDateTime.now();
     }
@@ -113,6 +125,18 @@ public class CandidateCv {
 
     public String getTemplate() {
         return template;
+    }
+
+    public String getProjects() {
+        return projects;
+    }
+
+    public String getLanguages() {
+        return languages;
+    }
+
+    public String getHobbies() {
+        return hobbies;
     }
 
     public LocalDateTime getUpdatedAt() {

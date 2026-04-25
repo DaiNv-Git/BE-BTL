@@ -31,6 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/applications")
+@org.springframework.transaction.annotation.Transactional
 public class ApplicationController {
     private final JobApplicationRepository applications;
     private final JobPostRepository jobs;
@@ -69,7 +70,17 @@ public class ApplicationController {
         if (job.getStatus() != JobStatus.APPROVED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only approved jobs can receive applications");
         }
-        return ApplicationResponse.from(applications.save(new JobApplication(job, candidate, request.coverLetter())));
+        
+        JobApplication application = applications.save(new JobApplication(job, candidate, request.coverLetter()));
+        
+        notifications.save(new UserNotification(
+                job.getEmployer(),
+                "Co ung vien moi",
+                candidate.getFullName() + " vua ung tuyen vao vi tri " + job.getTitle() + ".",
+                job.getId()
+        ));
+        
+        return ApplicationResponse.from(application);
     }
 
     @RequestMapping(path = "/{id}/accept", method = {RequestMethod.PATCH, RequestMethod.POST})
@@ -99,7 +110,7 @@ public class ApplicationController {
         String message = status == ApplicationStatus.ACCEPTED
                 ? "Nha tuyen dung " + companyName + " da chap nhan ho so ung tuyen vi tri " + jobTitle + ". Vui long theo doi email/dien thoai de nhan lich phong van."
                 : "Nha tuyen dung " + companyName + " da tu choi ho so ung tuyen vi tri " + jobTitle + ". Ban co the tiep tuc ung tuyen cac viec lam phu hop khac.";
-        notifications.save(new UserNotification(candidate, title, message));
+        notifications.save(new UserNotification(candidate, title, message, application.getJob().getId()));
         return applications.findById(saved.getId())
                 .map(ApplicationResponse::from)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Application saved but cannot be loaded"));

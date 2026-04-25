@@ -32,13 +32,17 @@ public class UserNotification {
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column
+    private Long jobId;
+
     protected UserNotification() {
     }
 
-    public UserNotification(AppUser recipient, String title, String message) {
+    public UserNotification(AppUser recipient, String title, String message, Long jobId) {
         this.recipient = recipient;
         this.title = title;
         this.message = message;
+        this.jobId = jobId;
     }
 
     public Long getId() {
@@ -63,5 +67,9 @@ public class UserNotification {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public Long getJobId() {
+        return jobId;
     }
 }
