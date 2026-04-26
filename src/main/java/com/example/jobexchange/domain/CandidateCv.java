@@ -6,7 +6,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
@@ -17,7 +17,7 @@ public class CandidateCv {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private AppUser candidate;
 
     @Column(nullable = false)
@@ -56,18 +56,21 @@ public class CandidateCv {
     @Column(nullable = true)
     private String template = "classic";
 
+    @Column(columnDefinition = "LONGTEXT")
+    private String cvData;
+
     @Column(nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     protected CandidateCv() {
     }
 
-    public CandidateCv(AppUser candidate, String title, String desiredPosition, String experienceLevel, String summary, String skills, String education, String experience, String certifications, String projects, String languages, String hobbies, String template) {
+    public CandidateCv(AppUser candidate, String title, String desiredPosition, String experienceLevel, String summary, String skills, String education, String experience, String certifications, String projects, String languages, String hobbies, String template, String cvData) {
         this.candidate = candidate;
-        update(title, desiredPosition, experienceLevel, summary, skills, education, experience, certifications, projects, languages, hobbies, template);
+        update(title, desiredPosition, experienceLevel, summary, skills, education, experience, certifications, projects, languages, hobbies, template, cvData);
     }
 
-    public void update(String title, String desiredPosition, String experienceLevel, String summary, String skills, String education, String experience, String certifications, String projects, String languages, String hobbies, String template) {
+    public void update(String title, String desiredPosition, String experienceLevel, String summary, String skills, String education, String experience, String certifications, String projects, String languages, String hobbies, String template, String cvData) {
         this.title = title;
         this.desiredPosition = desiredPosition;
         this.experienceLevel = experienceLevel;
@@ -80,6 +83,7 @@ public class CandidateCv {
         this.languages = languages;
         this.hobbies = hobbies;
         this.template = template == null || template.isBlank() ? "classic" : template;
+        this.cvData = cvData;
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -137,6 +141,10 @@ public class CandidateCv {
 
     public String getHobbies() {
         return hobbies;
+    }
+
+    public String getCvData() {
+        return cvData;
     }
 
     public LocalDateTime getUpdatedAt() {

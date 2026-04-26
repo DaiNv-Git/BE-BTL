@@ -3,6 +3,7 @@ package com.example.jobexchange.controller;
 import com.example.jobexchange.config.AuthContext;
 import com.example.jobexchange.domain.AppUser;
 import com.example.jobexchange.domain.ApplicationStatus;
+import com.example.jobexchange.domain.CandidateCv;
 import com.example.jobexchange.domain.JobApplication;
 import com.example.jobexchange.domain.JobPost;
 import com.example.jobexchange.domain.JobStatus;
@@ -11,6 +12,7 @@ import com.example.jobexchange.domain.UserNotification;
 import com.example.jobexchange.dto.ApplicationResponse;
 import com.example.jobexchange.dto.CreateApplicationRequest;
 import com.example.jobexchange.repository.AppUserRepository;
+import com.example.jobexchange.repository.CandidateCvRepository;
 import com.example.jobexchange.repository.JobApplicationRepository;
 import com.example.jobexchange.repository.JobPostRepository;
 import com.example.jobexchange.repository.UserNotificationRepository;
@@ -36,13 +38,15 @@ public class ApplicationController {
     private final JobApplicationRepository applications;
     private final JobPostRepository jobs;
     private final AppUserRepository users;
+    private final CandidateCvRepository cvs;
     private final UserNotificationRepository notifications;
     private final AuthContext authContext;
 
-    public ApplicationController(JobApplicationRepository applications, JobPostRepository jobs, AppUserRepository users, UserNotificationRepository notifications, AuthContext authContext) {
+    public ApplicationController(JobApplicationRepository applications, JobPostRepository jobs, AppUserRepository users, CandidateCvRepository cvs, UserNotificationRepository notifications, AuthContext authContext) {
         this.applications = applications;
         this.jobs = jobs;
         this.users = users;
+        this.cvs = cvs;
         this.notifications = notifications;
         this.authContext = authContext;
     }
@@ -57,7 +61,7 @@ public class ApplicationController {
                 .stream()
                 .filter(application -> currentUser.getRole() == UserRole.ADMIN
                         || application.getJob().getEmployer().getId().equals(currentUser.getId()))
-                .map(ApplicationResponse::from)
+                .map(this::toResponse)
                 .toList();
     }
 
@@ -71,7 +75,12 @@ public class ApplicationController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only approved jobs can receive applications");
         }
         
-        JobApplication application = applications.save(new JobApplication(job, candidate, request.coverLetter()));
+        CandidateCv selectedCv = request.cvId() == null
+                ? cvs.findFirstByCandidateIdOrderByUpdatedAtDesc(candidate.getId()).orElse(null)
+                : cvs.findById(request.cvId())
+                        .filter(cv -> cv.getCandidate().getId().equals(candidate.getId()))
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selected CV not found"));
+        JobApplication application = applications.save(new JobApplication(job, candidate, request.coverLetter(), selectedCv));
         
         notifications.save(new UserNotification(
                 job.getEmployer(),
@@ -80,7 +89,7 @@ public class ApplicationController {
                 job.getId()
         ));
         
-        return ApplicationResponse.from(application);
+        return toResponse(application);
     }
 
     @RequestMapping(path = "/{id}/accept", method = {RequestMethod.PATCH, RequestMethod.POST})
@@ -112,7 +121,14 @@ public class ApplicationController {
                 : "Nha tuyen dung " + companyName + " da tu choi ho so ung tuyen vi tri " + jobTitle + ". Ban co the tiep tuc ung tuyen cac viec lam phu hop khac.";
         notifications.save(new UserNotification(candidate, title, message, application.getJob().getId()));
         return applications.findById(saved.getId())
-                .map(ApplicationResponse::from)
+                .map(this::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Application saved but cannot be loaded"));
+    }
+
+    private ApplicationResponse toResponse(JobApplication application) {
+        CandidateCv cv = application.getCvId() == null
+                ? cvs.findFirstByCandidateIdOrderByUpdatedAtDesc(application.getCandidate().getId()).orElse(null)
+                : cvs.findById(application.getCvId()).orElse(null);
+        return ApplicationResponse.from(application, cv);
     }
 }

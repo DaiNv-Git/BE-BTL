@@ -14,6 +14,7 @@ public record SaveCvRequest(
         String projects,
         String languages,
         String hobbies,
-        String template
+        String template,
+        String cvData
 ) {
 }

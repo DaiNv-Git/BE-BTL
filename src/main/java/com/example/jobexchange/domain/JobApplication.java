@@ -28,6 +28,17 @@ public class JobApplication {
     @Column(nullable = false, length = 2000)
     private String coverLetter;
 
+    private Long cvId;
+
+    private String cvTitle;
+
+    private String desiredPosition;
+
+    private String cvTemplate;
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String cvData;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ApplicationStatus status = ApplicationStatus.SUBMITTED;
@@ -44,6 +55,22 @@ public class JobApplication {
         this.coverLetter = coverLetter;
     }
 
+    public JobApplication(JobPost job, AppUser candidate, String coverLetter, CandidateCv cv) {
+        this(job, candidate, coverLetter);
+        attachCvSnapshot(cv);
+    }
+
+    public void attachCvSnapshot(CandidateCv cv) {
+        if (cv == null) {
+            return;
+        }
+        this.cvId = cv.getId();
+        this.cvTitle = cv.getTitle();
+        this.desiredPosition = cv.getDesiredPosition();
+        this.cvTemplate = cv.getTemplate();
+        this.cvData = cv.getCvData();
+    }
+
     public Long getId() {
         return id;
     }
@@ -58,6 +85,26 @@ public class JobApplication {
 
     public String getCoverLetter() {
         return coverLetter;
+    }
+
+    public Long getCvId() {
+        return cvId;
+    }
+
+    public String getCvTitle() {
+        return cvTitle;
+    }
+
+    public String getDesiredPosition() {
+        return desiredPosition;
+    }
+
+    public String getCvTemplate() {
+        return cvTemplate;
+    }
+
+    public String getCvData() {
+        return cvData;
     }
 
     public ApplicationStatus getStatus() {

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 public record CreateApplicationRequest(
         @NotNull Long jobId,
         @NotNull Long candidateId,
+        Long cvId,
         @NotBlank String coverLetter
 ) {
 }

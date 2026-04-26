@@ -21,6 +21,7 @@ public record CvResponse(
         String languages,
         String hobbies,
         String template,
+        String cvData,
         LocalDateTime updatedAt
 ) {
     public static CvResponse from(CandidateCv cv) {
@@ -42,6 +43,7 @@ public record CvResponse(
                 cv.getLanguages(),
                 cv.getHobbies(),
                 cv.getTemplate(),
+                cv.getCvData(),
                 cv.getUpdatedAt()
         );
     }
